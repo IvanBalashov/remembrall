@@ -19,7 +19,7 @@ def start(message) -> None:
 	message.text = f"Available commands - /setmsg, /stopsending"
 	bot.send_message(message.chat.id, message.text)
 
-@bot.message_handler(commands=['day'])
+@bot.message_handler(commands=['eday'])
 def download(message) -> None:
 	keyboard = types.InlineKeyboardMarkup()
 	keyboard.add(types.InlineKeyboardButton(text=f"+1 Hour", callback_data=f"+1_hour"))
@@ -31,6 +31,7 @@ def download(message) -> None:
 	store.save_data_in_store(message.from_user.username,
 				 {'chat_id': message.chat.id,
 				  'u_id': message.from_user.id,
+				  'text': message.text,
 				  'data': strftime("H:%M:", gmtime())})
 
 	bot.send_message(message.chat.id, f"{strftime("%H:%M:", gmtime())}", reply_markup=keyboard)
@@ -40,30 +41,33 @@ def callback_handler(call) -> None:
 	if call.message:
 		if call.data.find("+1_hour") != -1:
 			bot.send_message(call.message.chat.id, f"+1 hour")
-			set_data_in_store(call, "+1", "hour")
+			set_data_in_store(username, "+1", "hour")
 		if call.data.find("-1_hour") != -1:
 			bot.send_message(call.message.chat.id, f"-1 hour")
-			set_data_in_store(call, "-1", "hour")
+			set_data_in_store(username, "-1", "hour")
 		if call.data.find("+5_minutes") != -1:
 			bot.send_message(call.message.chat.id, f"+5 minutes")
-			set_data_in_store(call, "+5", "minutes")
+			set_data_in_store(username, "+5", "minutes")
 		if call.data.find("-5_minutes") != -1:
 			bot.send_message(call.message.chat.id, f"-5 minutes")
-			set_data_in_store(call, "-5", "minutes")
+			set_data_in_store(username, "-5", "minutes")
 		if call.data.find("done") != -1:
 			bot.send_message(call.message.chat.id, f"Done")
-			set_data_in_store(call, "0", "done")
+			set_data_in_store(username, "0", "done")
 
-def set_data_in_store(call, data, time_type) -> None:
-	obj = store.get_full_obj_from_store(call.message.from_user.username)
-	store.delete_data_in_store(call.message.from_user.username)
+def set_data_in_store(username, data, time_type) -> None:
+	obj = store.get_full_obj_from_store(username)
+	store.delete_data_in_store(username)
+	if data.find("done") != -1:
+		#save in db
+		return
 	hours, minutes = edit_time(obj['data'])
-	if data.find("+"):
+	if data.find("+") != -1:
 		if time_type.find("hour"):
 			hours += 1
 		else:
 			minutes += 1
-	if data.find("-"):
+	if data.find("-") != -1:
 		if time_type.find("hour"):
 			hours -= 1
 		else:
@@ -73,13 +77,13 @@ def set_data_in_store(call, data, time_type) -> None:
 	if minutes >= 60:
 		minutes -= 60
 	obj['data'] = f"{hours}:{minutes}"
-	store.save_data_in_store(call.)
+	store.save_data_in_store(username, obj)
 
+#TODO: rewrite reqexp
 def edit_time(str_time) -> int, int:
 	hours = re.findall(r'[0-2][0-9]:', str_time)
 	minutes = re.findall(r':[0-5][0-9]', str_time)
 	return int(hours[:len(hours)-1]), int(minutes[1:])
-
 
 if __name__ == '__main__':
 	try:
