@@ -10,7 +10,7 @@ RUN apt-get install -y make build-essential libssl-dev zlib1g-dev \
 && apt-get update && apt-get -t testing install -y python3.6 \
 && apt-get -t testing install -y git ffmpeg wget python3-pip \
 && cd /root/ \
-&& git clone https://github.com/IvanBalashov/rememberball \
+&& git clone --single-branch --branch development https://github.com/IvanBalashov/rememberball \
 && pip3 install virtualenv virtualenvwrapper \
 && pip3 install -r /root/rememberball/deploy/requirements.txt
 ENV BOT_TOKEN default 
