@@ -13,6 +13,11 @@ RUN apt-get install -y make build-essential libssl-dev zlib1g-dev \
 && git clone https://github.com/IvanBalashov/rememberball \
 && pip3 install virtualenv virtualenvwrapper \
 && pip3 install -r /root/rememberball/deploy/requirements.txt
+ENV BOT_TOKEN default 
+ENV MONGODB_HOST mongo
+ENV MONGODB_PORT 27017
+ENV REDIS_HOST rejson
+ENV REDIS_PORT 6379
 
 COPY entry-point.sh /root/rememberball/
 ENTRYPOINT ["/bin/bash","/root/rememberball/entry-point.sh"]
